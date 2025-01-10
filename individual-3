@@ -1,0 +1,68 @@
+#include<fstream>
+#include<vector>
+#include<set>
+
+using namespace std;
+
+vector < vector < int > > f(26, vector < int >());
+vector < bool > used(26, 0);
+
+ifstream fin("input.txt");
+ofstream fout("output.txt");
+
+int DFS(int u)
+{
+    if(used[u]) return 0;
+    used[u] = 1;
+    for(int i : f[u])
+    {
+        DFS(i);
+    }
+    return 0;
+}
+
+int main()
+{
+    int n;
+    vector < pair < int, int > > t(26, {0 , 0});
+    fin >> n;
+    for(int i = 0; i < n; i++)  
+    {
+        string s;
+        fin >> s;
+        f[*(s.begin()) - 97].push_back(*(s.end() - 1) - 97);
+        t[*(s.begin()) - 97].first++;
+        t[*(s.end() - 1) - 97].second++;
+    }
+
+    for(auto i : t)
+    {
+        if(i.first != i.second)
+        {
+            fout << "No";
+            return 0;
+        }
+    }
+
+    for(int i = 0; i < 26; i++)
+    {
+        if(t[i].first + t[i].second != 0)
+        {
+            DFS(i);
+            break;
+        }
+    }
+
+    for(int i = 0; i < 26; i++)
+    {
+        if(t[i].first + t[i].second != 0 && !used[i])
+        {
+            fout << "No";
+            return 0;
+        }
+    }
+
+    fout << "Yes";
+
+    return 0;
+}
