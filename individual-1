@@ -1,0 +1,27 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+using namespace std;
+int main() {
+	ifstream input("input.txt");
+	ofstream output("output.txt");
+	int k;
+	input>> k;
+	vector<vector<int>> trian(k, vector<int>(k, 0));
+	for (int i = 0; i < k; ++i) {
+		trian[i].resize(i + 1);
+		for (int j = 0; j < i + 1; ++j) {
+			input >> trian[i][j];
+		}
+	}
+	for (int i = k - 2; i >= 0; --i) {
+		for (int j = 0; j <= i; ++j) {
+			trian[i][j] += max(trian[i + 1][j], trian[i + 1][j + 1]);
+		}
+	}
+	output << trian[0][0] << endl;
+	input.close();
+	output.close();
+	return 0;
+}
