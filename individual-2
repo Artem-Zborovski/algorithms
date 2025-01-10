@@ -1,0 +1,121 @@
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+
+struct tree {
+    long long k;
+    tree* l;
+    tree* r;
+    long long lglub;
+    long long rglub;
+};
+tree* createNode(long long k1) {
+    tree* newNode = new tree;
+    newNode->k = k1;
+    newNode->l = nullptr;
+    newNode->r = nullptr;
+    newNode->lglub = 0;
+    newNode->rglub = 0;
+    return newNode;
+}
+tree* ins(tree* rt, long long k1) {
+    if (rt == nullptr) {
+        return createNode(k1);
+    }
+    if (k1 < rt->k) {
+        rt->l = ins(rt->l, k1);
+    } else {
+        rt->r = ins(rt->r, k1);
+    }
+    return rt;
+}
+long long countglub(tree* n) {
+    if (n == nullptr) {
+        return 0;
+    }
+    n->lglub = countglub(n->l);
+    n->rglub = countglub(n->r);
+    return n->lglub + n->rglub + 1;
+}
+tree* deln(tree* rt, long long k1) {
+    if (rt == nullptr) {
+        return rt;
+    }
+
+    if (k1 < rt->k) {
+        rt->l = deln(rt->l, k1);
+    } else if (k1 > rt->k) {
+        rt->r = deln(rt->r, k1);
+    } else {
+        if (rt->l == nullptr) {
+            tree* t = rt->r;
+            delete rt;
+            return t;
+        } else if (rt->r == nullptr) {
+            tree* t = rt->l;
+            delete rt;
+            return t;
+        }
+        tree* t = rt->r;
+        while (t->l != nullptr) {
+            t = t->l;
+        }
+        rt->k = t->k;
+        rt->r = deln(rt->r, t->k);
+    }
+    return rt;
+}
+void find(tree* n, vector<tree*>& nodes) {
+    if (n == nullptr) {
+        return;
+    }
+    find(n->l, nodes);
+    if (abs(n->lglub - n->rglub) == 1) {
+        nodes.push_back(n);
+    }
+    find(n->r, nodes);
+}
+
+void prleftobhod(tree* n, ofstream& out) {
+    if (n == nullptr) {
+        return;
+    }
+    out << n->k << "\n";
+    prleftobhod(n->l, out);
+    prleftobhod(n->r, out);
+}
+
+void clearTree(tree* n) {
+    if (n == nullptr) return;
+    clearTree(n->l);
+    clearTree(n->r);
+    delete n;
+}
+
+int main() {
+    ifstream in("in.txt", ios::in | ios::binary); 
+    ofstream out("out.txt", ios::out | ios::binary);
+
+    tree* rt = nullptr;
+    long long k;
+    vector<tree*> c;
+
+    while (in >> k) {
+        rt = ins(rt, k);
+    }
+
+    if (rt != nullptr) {
+        countglub(rt); 
+        find(rt, c);
+        if (c.size() % 2 == 1 && !c.empty()) {
+            sort(c.begin(), c.end(), [](tree* a, tree* b) { return a->k < b->k; });
+            tree* medianNode = c[c.size() / 2];
+            rt = deln(rt, medianNode->k);
+        }
+        prleftobhod(rt, out);
+    }
+    clearTree(rt); 
+    return 0;
+}
