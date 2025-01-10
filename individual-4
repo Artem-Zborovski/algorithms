@@ -1,0 +1,60 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int count = 0;
+
+    public static int findSet(int value, int[] parent) {
+        if (value == parent[value]) {
+            return value;
+        }
+        return parent[value] = findSet(parent[value], parent);
+    }
+
+    public static void unionSets(int firstParent, int secondParent, int[] parent) {
+        firstParent = findSet(firstParent, parent);
+        secondParent = findSet(secondParent, parent);
+        if (firstParent != secondParent) {
+            parent[secondParent] = firstParent;
+            count--;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("in.txt"));
+        StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
+        int n = Integer.parseInt(tokenizer.nextToken());
+        int m = Integer.parseInt(tokenizer.nextToken());
+
+        int[] matrix = new int[n * m];
+        int[] parent = new int[n * m];
+        Arrays.fill(parent, -1);
+
+        for (int i = 0; i < n * m; i++) {
+            int value = Integer.parseInt(reader.readLine().trim());
+            if (value == 0) {
+                count++;
+                matrix[i] = 0;
+                parent[i] = i;
+            }
+        }
+        reader.close();
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (matrix[i * m + j] == 0) {
+                    if (j < m - 1 && matrix[i * m + j + 1] == 0) {
+                        unionSets(i * m + j, i * m + j + 1, parent);
+                    }
+                    if (i < n - 1 && matrix[(i + 1) * m + j] == 0) {
+                        unionSets(i * m + j, (i + 1) * m + j, parent);
+                    }
+                }
+            }
+        }
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter("out.txt"));
+        writer.write(String.valueOf(count));
+        writer.close();
+    }
+}
